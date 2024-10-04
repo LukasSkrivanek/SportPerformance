@@ -105,6 +105,9 @@ extension PerformanceViewModel {
 
 // MARK: - Helpers:
 extension PerformanceViewModel {
+    var isValid: Bool {
+           return !title.isEmpty && !location.isEmpty && duration > 0
+       }
     var filteredPerformances: [any Performance] {
         switch filter {
         case "Local":
@@ -118,7 +121,8 @@ extension PerformanceViewModel {
         }
     }
     
-    func fetchPerformances<PerformanceType>(from publisher: AnyPublisher<[PerformanceType], Error>, update: @escaping ([PerformanceType]) -> Void) {
+    func fetchPerformances<PerformanceType>(from publisher: AnyPublisher<[PerformanceType], Error>,
+                                            update: @escaping ([PerformanceType]) -> Void) {
         publisher
             .receive(on: DispatchQueue.main)
             .sink(receiveCompletion: handleCompletion, receiveValue: update)

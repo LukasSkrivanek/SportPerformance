@@ -24,8 +24,6 @@ struct SportPerformanceFirestore: Codable, Identifiable, Performance {
     var isLocal: Bool 
 }
 
-
-// Model pro SwiftData
 @Model
 class SportPerformanceLocal: ObservableObject, Identifiable, Performance{
     @Attribute(.unique) var id: String

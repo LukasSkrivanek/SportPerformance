@@ -32,6 +32,7 @@ struct AddPerformanceView: View {
                 viewModel.duration = 0
                 presentationMode.wrappedValue.dismiss()
             }
+            .disabled(!viewModel.isValid)
         }
         .alert(isPresented: $alertManager.isPresented) {
                         Alert(title: Text(alertManager.alertTitle), message: Text(alertManager.alertMessage), dismissButton: .default(Text("OK")))

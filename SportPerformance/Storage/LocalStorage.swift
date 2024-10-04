@@ -18,11 +18,10 @@ class LocalStorage<T: PersistentModel>: PerformanceStorage, ObservableObject {
 
 // MARK: - Save Operations
 extension LocalStorage {
-    // Save an item to local storage
     func save(_ item: T, alertManager: AlertManager) {
-        modelContext.insert(item)  // Insert item into context
+        modelContext.insert(item)
         do {
-            try modelContext.save() // Save changes to the context
+            try modelContext.save()
         } catch {
             alertManager.show(title: AppError.saveError.localizedDescription, message: "")
         }
@@ -33,29 +32,27 @@ extension LocalStorage {
 extension LocalStorage {
     // Fetch items from local storage
     func fetch(alertManager: AlertManager) -> AnyPublisher<[T], Error> {
-        let fetchDescriptor = FetchDescriptor<T>() // You may add filters, sorting, etc. as needed
+        let fetchDescriptor = FetchDescriptor<T>()
         
         return Future { promise in
             do {
-                // Fetch the items using the model context
-                let items = try self.modelContext.fetch(fetchDescriptor) // Fetching items
-                promise(.success(items)) // Return the successfully fetched items
+                let items = try self.modelContext.fetch(fetchDescriptor)
+                promise(.success(items))
             } catch {
                 alertManager.show(title: AppError.fetchError.localizedDescription, message: "")
-                promise(.failure(error)) // Propagate the error to the subscriber
+                promise(.failure(error))
             }
         }
-        .eraseToAnyPublisher() // Convert Future to AnyPublisher for Combine use
+        .eraseToAnyPublisher()
     }
 }
 
 // MARK: - Delete Operations
 extension LocalStorage {
-    // Delete an item from local storage
     func delete(_ item: T, alertManager: AlertManager) {
-        modelContext.delete(item)  // Remove item from context
+        modelContext.delete(item)
         do {
-            try modelContext.save()  // Save changes
+            try modelContext.save()
         } catch {
             alertManager.show(title: AppError.deleteError.localizedDescription, message: "")
         }

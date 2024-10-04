@@ -14,11 +14,8 @@ class RemoteStorage<T: Identifiable & Codable>: PerformanceStorage, ObservableOb
 
 // MARK: - Save Operations
 extension RemoteStorage {
-    
-    // Save an item to Firestore
     func save(_ item: T, alertManager: AlertManager) {
         do {
-            // Attempt to save the item to Firestore
             _ = try db.collection("performances")
                 .document(item.id as? String ?? UUID().uuidString)
                 .setData(from: item)
@@ -30,14 +27,13 @@ extension RemoteStorage {
 
 // MARK: - Fetch Operations
 extension RemoteStorage {
-    // Fetch items from Firestore
     func fetch(alertManager: AlertManager) -> AnyPublisher<[T], Error> {
         Future { promise in
             self.db.collection("performances")
                 .getDocuments { (querySnapshot, error) in
                 if let error = error {
                     alertManager.show(title: AppError.fetchError.localizedDescription, message: "")
-                    promise(.failure(error)) // Propagate the error to the subscriber
+                    promise(.failure(error))
                     return
                 }
                 
@@ -47,17 +43,15 @@ extension RemoteStorage {
                         items.append(item)
                     }
                 }
-                promise(.success(items)) // Return the successfully fetched items
+                promise(.success(items))
             }
         }
-        .eraseToAnyPublisher() // Convert Future to AnyPublisher
+        .eraseToAnyPublisher()
     }
 }
 
 // MARK: - Delete Operations
 extension RemoteStorage {
-    
-    // Delete an item from Firestore
     func delete(_ item: T, alertManager: AlertManager) {
         db.collection("performances").document(item.id as? String ?? UUID().uuidString).delete { error in
             if let _ = error {
