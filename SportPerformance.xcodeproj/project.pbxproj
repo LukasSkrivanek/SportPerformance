@@ -7,7 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		FA17F6612CAAB19800DFBC51 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = FA17F6602CAAB19800DFBC51 /* FirebaseFirestore */; };
+		FA3E87E72E65FADB001EA6F6 /* SportPerformanceApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA3E87E32E65FADB001EA6F6 /* SportPerformanceApp.swift */; };
+		FA3E883E2E6B58F5001EA6F6 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = FA3E883D2E6B58F5001EA6F6 /* FirebaseFirestore */; };
+		FA3E88422E6DF657001EA6F6 /* Swinject in Frameworks */ = {isa = PBXBuildFile; productRef = FA3E88412E6DF657001EA6F6 /* Swinject */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -22,6 +24,7 @@
 
 /* Begin PBXFileReference section */
 		FA17F64C2CAAAF3D00DFBC51 /* SportPerformance.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SportPerformance.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		FA3E87E32E65FADB001EA6F6 /* SportPerformanceApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SportPerformanceApp.swift; sourceTree = "<group>"; };
 		FA9D29A12CAEA33E008D235C /* SportPerformanceUnitTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SportPerformanceUnitTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -43,7 +46,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				FA17F6612CAAB19800DFBC51 /* FirebaseFirestore in Frameworks */,
+				FA3E883E2E6B58F5001EA6F6 /* FirebaseFirestore in Frameworks */,
+				FA3E88422E6DF657001EA6F6 /* Swinject in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -60,6 +64,7 @@
 		FA17F6432CAAAF3D00DFBC51 = {
 			isa = PBXGroup;
 			children = (
+				FA3E87E32E65FADB001EA6F6 /* SportPerformanceApp.swift */,
 				FA17F64E2CAAAF3D00DFBC51 /* SportPerformance */,
 				FA9D29A22CAEA33E008D235C /* SportPerformanceUnitTests */,
 				FA17F64D2CAAAF3D00DFBC51 /* Products */,
@@ -95,7 +100,8 @@
 			);
 			name = SportPerformance;
 			packageProductDependencies = (
-				FA17F6602CAAB19800DFBC51 /* FirebaseFirestore */,
+				FA3E883D2E6B58F5001EA6F6 /* FirebaseFirestore */,
+				FA3E88412E6DF657001EA6F6 /* Swinject */,
 			);
 			productName = SportPerformance;
 			productReference = FA17F64C2CAAAF3D00DFBC51 /* SportPerformance.app */;
@@ -153,7 +159,8 @@
 			mainGroup = FA17F6432CAAAF3D00DFBC51;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
-				FA17F65F2CAAB19800DFBC51 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+				FA3E883C2E6B58F4001EA6F6 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+				FA3E88402E6DF657001EA6F6 /* XCRemoteSwiftPackageReference "Swinject" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = FA17F64D2CAAAF3D00DFBC51 /* Products */;
@@ -188,6 +195,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FA3E87E72E65FADB001EA6F6 /* SportPerformanceApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -459,21 +467,34 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		FA17F65F2CAAB19800DFBC51 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+		FA3E883C2E6B58F4001EA6F6 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 11.2.0;
+				minimumVersion = 12.2.0;
+			};
+		};
+		FA3E88402E6DF657001EA6F6 /* XCRemoteSwiftPackageReference "Swinject" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/Swinject/Swinject.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.10.0;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		FA17F6602CAAB19800DFBC51 /* FirebaseFirestore */ = {
+		FA3E883D2E6B58F5001EA6F6 /* FirebaseFirestore */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = FA17F65F2CAAB19800DFBC51 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			package = FA3E883C2E6B58F4001EA6F6 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseFirestore;
+		};
+		FA3E88412E6DF657001EA6F6 /* Swinject */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = FA3E88402E6DF657001EA6F6 /* XCRemoteSwiftPackageReference "Swinject" */;
+			productName = Swinject;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

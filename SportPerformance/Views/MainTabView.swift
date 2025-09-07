@@ -7,24 +7,25 @@
 import SwiftUI
 
 struct MainTabView: View {
-    @EnvironmentObject var alertManager: AlertManager
-     var localStorage: LocalStorage<SportPerformanceLocal>
-     var remoteStorage: RemoteStorage<SportPerformanceFirestore>
-    
+
+    @Environment(AlertManager.self) var alertManager
+    @Environment(Coordinator.self) var coordinator
+    @Environment(AppState.self) var appState
+
     var body: some View {
-        TabView {
-            PerformanceListView(localStorage: localStorage,
-                                remoteStorage: remoteStorage,
-                                alertManager: alertManager)
+        TabView(selection: .twoWay(\.selectedTab, on: appState)) {
+            coordinator.build(page: .performanceList)
                 .tabItem {
                     Label("List", systemImage: "list.dash")
                 }
-            AddPerformanceView(viewModel: PerformanceViewModel(localStorage: localStorage,
-                                                               remoteStorage: remoteStorage,
-                                                               alertManager: alertManager))
-                .tabItem {
-                    Label("Add", systemImage: "plus")
-                }
+                .tag(Tab.list)
+
+            coordinator.build(page: .addPerformance)
+            .tabItem {
+                Label("Add", systemImage: "plus")
+            }
+            .tag(Tab.add)
         }
     }
 }
+

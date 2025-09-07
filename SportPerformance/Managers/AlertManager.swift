@@ -7,6 +7,7 @@
 import SwiftUI
 
 enum AppError: LocalizedError {
+
     case saveError
     case fetchError
     case deleteError
@@ -32,10 +33,12 @@ enum AppError: LocalizedError {
     }
 }
 
-class AlertManager: ObservableObject {
-    @Published var isPresented: Bool = false
-    @Published var alertTitle: String = ""
-    @Published var alertMessage: String = ""
+@Observable
+class AlertManager{
+
+    var isPresented: Bool = false
+    var alertTitle: String = ""
+    var alertMessage: String = ""
     
     func show(title: String, message: String) {
         self.alertTitle = title

@@ -5,24 +5,32 @@
 //  Created by macbook on 30.09.2024.
 //
 import SwiftUI
-import Combine
+import Observation
 
-class PerformanceViewModel<LocalStorage: PerformanceStorage,
-                           RemoteStorage: PerformanceStorage>: ObservableObject
+enum PerformanceFilter: String, CaseIterable {
+    case all = "All"
+    case local = "Local"
+    case remote = "Remote"
+}
+
+@MainActor @Observable
+final class PerformanceViewModel<
+    LocalStorage: PerformanceStorage,
+    RemoteStorage: PerformanceStorage
+>
 where LocalStorage.T == SportPerformanceLocal,
       RemoteStorage.T == SportPerformanceFirestore {
-    @Published var performances: [any Performance] = []
-    @Published  var filter: String = "All"
-    // AddPerformance variables
-    @Published var title: String = ""
-    @Published var location: String = ""
-    @Published var duration: TimeInterval = 0
-    @Published var isLocal: Bool = true
+    
+    var performances: [any Performance] = []
+    var filter: PerformanceFilter = .all
+    var title = ""
+    var location = ""
+    var duration: TimeInterval = 0
+    var isLocal = true
     
     private var localStorage: LocalStorage
     private var remoteStorage: RemoteStorage
     private var alertManager: AlertManager
-    private var cancellables = Set<AnyCancellable>()
     
     init(localStorage: LocalStorage,
          remoteStorage: RemoteStorage,
@@ -30,7 +38,9 @@ where LocalStorage.T == SportPerformanceLocal,
         self.localStorage = localStorage
         self.remoteStorage = remoteStorage
         self.alertManager = alertManager
-        loadPerformances()
+        Task {
+            await loadPerformances()
+        }
     }
 }
 
@@ -40,104 +50,87 @@ extension PerformanceViewModel {
     func addPerformance(title: String,
                         location: String,
                         duration: TimeInterval,
-                        isLocal: Bool) {
-        if isLocal {
-            let newLocalPerformance = SportPerformanceLocal(id: UUID().uuidString,
-                                                            title: title,
-                                                            location: location,
-                                                            duration: duration,
-                                                            isLocal: isLocal)
-            localStorage.save(newLocalPerformance, alertManager: alertManager)
-        } else {
-            let newRemotePerformance = SportPerformanceFirestore(id: UUID().uuidString,
-                                                                 title: title,
-                                                                 location: location,
-                                                                 duration: duration,
-                                                                 isLocal: false)
-            remoteStorage.save(newRemotePerformance, alertManager: alertManager)
+                        isLocal: Bool) async {
+        do {
+            if isLocal {
+                let newLocalPerformance = SportPerformanceLocal(
+                    id: UUID().uuidString,
+                    title: title,
+                    location: location,
+                    duration: duration,
+                    isLocal: isLocal
+                )
+                localStorage.save(newLocalPerformance, alertManager: alertManager)
+            } else {
+                let newRemotePerformance = SportPerformanceFirestore(
+                    id: UUID().uuidString,
+                    title: title,
+                    location: location,
+                    duration: duration,
+                    isLocal: false
+                )
+                remoteStorage.save(newRemotePerformance, alertManager: alertManager)
+            }
+            await loadPerformances()
         }
-        loadPerformances() 
     }
 }
 
 // MARK: - Load Operations
 extension PerformanceViewModel {
     
-    func loadPerformances(source: PerformanceSource = .both) {
-        switch source {
-        case .local:
-            fetchPerformances(from: localStorage
-                .fetch(alertManager: alertManager),
-                              update: { self.performances = $0 })
-        case .remote:
-            fetchPerformances(from: remoteStorage
-                .fetch(alertManager: alertManager),
-                              update: { self.performances = $0 })
-        case .both:
-            let localFetch = localStorage.fetch(alertManager: alertManager)
-            let remoteFetch = remoteStorage.fetch(alertManager: alertManager)
-            
-            localFetch
-                .combineLatest(remoteFetch)
-                .receive(on: DispatchQueue.main)
-                .sink(receiveCompletion: handleCompletion, receiveValue: { localPerformances,
-                    remotePerformances in
-                    self.performances = localPerformances + remotePerformances
-                })
-                .store(in: &cancellables)
+    func loadPerformances(source: PerformanceSource = .both) async {
+        do {
+            switch source {
+            case .local:
+                performances = try await localStorage.fetch(alertManager: alertManager)
+            case .remote:
+                performances = try await remoteStorage.fetch(alertManager: alertManager)
+            case .both:
+                async let localPerformances = localStorage.fetch(alertManager: alertManager)
+                async let remotePerformances = remoteStorage.fetch(alertManager: alertManager)
+                
+                let (local, remote) = try await (localPerformances, remotePerformances)
+                performances = local + remote
+            }
+        } catch {
+            print("Failed to fetch performances: \(error)")
         }
-        
     }
 }
 
 // MARK: - Delete Operations
 extension PerformanceViewModel {
     
-    func deletePerformance(_ performance: any Performance) {
-        if let localPerformance = performance as? SportPerformanceLocal {
-            localStorage.delete(localPerformance, alertManager: alertManager)
-        } else if let remotePerformance = performance as? SportPerformanceFirestore {
-            remoteStorage.delete(remotePerformance, alertManager: alertManager)
+    func deletePerformance(_ performance: any Performance) async {
+        do {
+            if let localPerformance = performance as? SportPerformanceLocal {
+                localStorage.delete(localPerformance, alertManager: alertManager)
+            } else if let remotePerformance = performance as? SportPerformanceFirestore {
+               remoteStorage.delete(remotePerformance, alertManager: alertManager)
+            }
+            await loadPerformances()
         }
-        loadPerformances()
     }
 }
 
 // MARK: - Helpers:
 extension PerformanceViewModel {
     var isValid: Bool {
-           return !title.isEmpty && !location.isEmpty && duration > 0
-       }
+        return !title.isEmpty && !location.isEmpty && duration > 0
+    }
+    
     var filteredPerformances: [any Performance] {
         switch filter {
-        case "Local":
-            return performances.filter { $0.isLocal }
-        case "Remote":
-            return performances.filter { !$0.isLocal }
-        case "All":
-            return performances
-        default:
-            return performances
-        }
-    }
-    
-    func fetchPerformances<PerformanceType>(from publisher: AnyPublisher<[PerformanceType], Error>,
-                                            update: @escaping ([PerformanceType]) -> Void) {
-        publisher
-            .receive(on: DispatchQueue.main)
-            .sink(receiveCompletion: handleCompletion, receiveValue: update)
-            .store(in: &cancellables)
-    }
-    
-    func handleCompletion(_ completion: Subscribers.Completion<Error>) {
-        if case .failure(let error) = completion {
-            self.alertManager.show(title: "Error", message: error.localizedDescription)
+        case .local: performances.filter { $0.isLocal }
+        case .remote: performances.filter { !$0.isLocal }
+        case .all: performances
         }
     }
 }
 
-    enum PerformanceSource {
-        case local
-        case remote
-        case both
-    }
+enum PerformanceSource {
+    case local
+    case remote
+    case both
+}

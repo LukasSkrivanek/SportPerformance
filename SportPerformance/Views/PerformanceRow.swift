@@ -7,8 +7,11 @@
 import SwiftUI
 
 struct PerformanceRow: View {
+
     @Environment(\.colorScheme) private var colorScheme
+
     var performance: any Performance
+
     var body: some View {
         HStack {
             VStack(alignment: .leading) {

@@ -8,7 +8,7 @@ import SwiftUI
 import FirebaseFirestore
 import Combine
 
-class RemoteStorage<T: Identifiable & Codable>: PerformanceStorage, ObservableObject {
+final class RemoteStorage<T: Identifiable & Codable>: PerformanceStorage, ObservableObject {
     private let db = Firestore.firestore()
 }
 
@@ -27,26 +27,29 @@ extension RemoteStorage {
 
 // MARK: - Fetch Operations
 extension RemoteStorage {
-    func fetch(alertManager: AlertManager) -> AnyPublisher<[T], Error> {
-        Future { promise in
-            self.db.collection("performances")
-                .getDocuments { (querySnapshot, error) in
-                if let error = error {
-                    alertManager.show(title: AppError.fetchError.localizedDescription, message: "")
-                    promise(.failure(error))
-                    return
+    func fetch(alertManager: AlertManager) async throws -> [T] {
+        do {
+            let querySnapshot = try await self.db.collection("performances").getDocuments()
+            
+            var items: [T] = []
+            for document in querySnapshot.documents {
+                do {
+                    let item = try document.data(as: T.self)
+                    items.append(item)
+                } catch {
+                    print("Error decoding document \(document.documentID): \(error)")
                 }
-                
-                var items = [T]()
-                querySnapshot?.documents.forEach { document in
-                    if let item = try? document.data(as: T.self) {
-                        items.append(item)
-                    }
-                }
-                promise(.success(items))
             }
+            return items
+        } catch {
+            await MainActor.run {
+                alertManager.show(
+                    title: AppError.fetchError.localizedDescription,
+                    message: ""
+                )
+            }
+            throw error
         }
-        .eraseToAnyPublisher()
     }
 }
 

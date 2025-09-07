@@ -4,11 +4,13 @@
 //
 //  Created by macbook on 30.09.2024.
 //
-import Combine
+
 import SwiftData
 import SwiftUI
 
-class LocalStorage<T: PersistentModel>: PerformanceStorage, ObservableObject {
+@Observable
+final class LocalStorage<T: PersistentModel>: PerformanceStorage {
+
     var modelContext: ModelContext
     
     init(container: ModelContainer) {
@@ -18,6 +20,7 @@ class LocalStorage<T: PersistentModel>: PerformanceStorage, ObservableObject {
 
 // MARK: - Save Operations
 extension LocalStorage {
+
     func save(_ item: T, alertManager: AlertManager) {
         modelContext.insert(item)
         do {
@@ -30,20 +33,24 @@ extension LocalStorage {
 
 // MARK: - Fetch Operations
 extension LocalStorage {
-    // Fetch items from local storage
-    func fetch(alertManager: AlertManager) -> AnyPublisher<[T], Error> {
+
+    @MainActor
+    func fetch(alertManager: AlertManager) async throws -> [T] {
         let fetchDescriptor = FetchDescriptor<T>()
         
-        return Future { promise in
-            do {
-                let items = try self.modelContext.fetch(fetchDescriptor)
-                promise(.success(items))
-            } catch {
-                alertManager.show(title: AppError.fetchError.localizedDescription, message: "")
-                promise(.failure(error))
+        do {
+            return try await MainActor.run {
+                try self.modelContext.fetch(fetchDescriptor)
             }
+        } catch {
+            await MainActor.run {
+                alertManager.show(
+                    title: AppError.fetchError.localizedDescription,
+                    message: ""
+                )
+            }
+            throw error
         }
-        .eraseToAnyPublisher()
     }
 }
 

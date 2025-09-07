@@ -5,7 +5,6 @@
 //  Created by macbook on 03.10.2024.
 //
 import XCTest
-import Combine
 import SwiftUI
 @testable import SportPerformance
 
