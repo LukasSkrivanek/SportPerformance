@@ -8,7 +8,6 @@ import SwiftUI
 
 struct MainTabView: View {
 
-    @Environment(AlertManager.self) var alertManager
     @Environment(Coordinator.self) var coordinator
     @Environment(AppState.self) var appState
 

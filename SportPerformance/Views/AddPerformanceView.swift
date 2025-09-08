@@ -16,9 +16,6 @@ struct AddPerformanceView: View {
            RemoteStorage<SportPerformanceFirestore>
        >.self) var viewModel
 
-    @Environment(\.presentationMode) private var presentationMode
-
-
     var body: some View {
         VStack {
             Form {
