@@ -33,15 +33,11 @@ extension LocalStorage {
 
 // MARK: - Fetch Operations
 extension LocalStorage {
-
-    @MainActor
+    
     func fetch(alertManager: AlertManager) async throws -> [T] {
         let fetchDescriptor = FetchDescriptor<T>()
-        
         do {
-            return try await MainActor.run {
-                try self.modelContext.fetch(fetchDescriptor)
-            }
+            return try self.modelContext.fetch(fetchDescriptor)
         } catch {
             await MainActor.run {
                 alertManager.show(

@@ -56,7 +56,6 @@ struct AddPerformanceView: View {
                     }
                     .toggleStyle(SwitchToggleStyle(tint: .blue))
                 }
-                
                 Section {
                     Button("Save") {
                         Task {
